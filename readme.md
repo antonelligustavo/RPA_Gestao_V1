@@ -14,7 +14,6 @@ Um sistema automatizado para gestão de usuários e acessos utilizando RPA (Robo
 - [Bibliotecas Utilizadas](#bibliotecas-utilizadas)
 - [Solução de Problemas](#solução-de-problemas)
 - [Compatibilidade](#compatibilidade)
-- [Contribuição](#contribuição)
 - [Autor](#autor)
 
 ## 🎯 Sobre o Projeto
@@ -255,32 +254,14 @@ playwright install chromium
 | 3.11 | ✅ |
 | 3.12 | ✅ |
 
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Por favor:
-
-1. Faça um Fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença [LICENSE_TYPE]. Veja o arquivo `LICENSE` para mais detalhes.
-
 ## 👨‍💻 Autor
 
 **Gustavo Antonelli**
 
-- GitHub: [@[SEU_GITHUB]]
-- LinkedIn: [Seu LinkedIn]
-- Email: [seu.email@exemplo.com]
+- GitHub: [@[github.com/antonelligustavo]]
+- LinkedIn: [www.linkedin.com/in/gustavo-fordiani-antonelli/]
+- Email: [antonelligustavo1@gmail.com]
 
 ---
-
-<div align="center">
-
-**⭐ Se este projeto foi útil para você, considere dar uma estrela!**
 
 </div>
