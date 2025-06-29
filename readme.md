@@ -258,7 +258,7 @@ playwright install chromium
 
 **Gustavo Antonelli**
 
-- GitHub: [@[github.com/antonelligustavo]]
+- GitHub: [github.com/antonelligustavo]
 - LinkedIn: [www.linkedin.com/in/gustavo-fordiani-antonelli/]
 - Email: [antonelligustavo1@gmail.com]
 
