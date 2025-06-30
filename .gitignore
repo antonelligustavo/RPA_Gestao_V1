@@ -9,12 +9,6 @@ Arquivos/.env
 *.env
 .env.*
 
-# Planilhas com dados sensíveis dos usuários
-Arquivos/usuarios.xlsx
-Arquivos/*.xlsx
-Arquivos/*.xls
-Arquivos/*.csv
-
 # Pasta de logs completa
 Log/
 logs/
