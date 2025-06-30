@@ -1,0 +1,40 @@
+# ================================
+# AUTOMATIZADOR DE GESTÃO DE ACESSO
+# Requirements para Python 3.8+
+# ================================
+
+# Automação Web - Playwright
+playwright==1.41.0
+
+# Manipulação de Dados
+pandas==2.1.4
+openpyxl==3.1.2
+
+# Gerenciamento de Ambiente
+python-dotenv==1.0.0
+
+# ================================
+# OBSERVAÇÕES
+# ================================
+
+# As seguintes bibliotecas são built-in (já incluídas no Python):
+# - asyncio (programação assíncrona)
+# - logging (sistema de logs)
+# - os (operações do sistema)
+# - json (manipulação JSON)
+# - datetime (manipulação de datas)
+# - time (controle de tempo)
+# - pathlib (manipulação de caminhos)
+
+# ================================
+# INSTALAÇÃO
+# ================================
+
+# Para instalar todas as dependências:
+# pip install -r requirements.txt
+
+# Para instalar navegadores do Playwright:
+# playwright install chromium
+
+# Para ambiente de desenvolvimento (opcional):
+# pip install pytest pytest-asyncio black flake8
