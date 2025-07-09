@@ -68,10 +68,13 @@ CONFIG = {
     },
     "timeouts": {
         "navigation": 30000,
-        "element": 10000,
-        "page_load": 3000,
-        "frame_stability": 2000,
-        "retry_delay": 2000
+        "element": 15000,  # Aumentado de 10000 para 15000
+        "element_critical": 20000,  # Novo timeout para elementos críticos
+        "page_load": 5000,  # Aumentado de 3000 para 5000
+        "frame_stability": 3000,  # Aumentado de 2000 para 3000
+        "retry_delay": 2500,  # Aumentado de 2000 para 2500
+        "polling_interval": 1000,  # Novo: intervalo para polling manual
+        "empresa_input_timeout": 25000  # Novo: timeout específico para empresa_input
     }
 }
 

@@ -2,7 +2,7 @@ import asyncio
 import logging
 import pandas as pd
 from config import CONFIG
-from utils import encontrar_frame, aguardar_elemento, obter_subgroup_id, obter_empresa_input_position
+from utils import encontrar_frame, aguardar_elemento, aguardar_elemento_com_polling, obter_subgroup_id, obter_empresa_input_position
 
 logger = logging.getLogger(__name__)
 
@@ -78,17 +78,69 @@ async def finalizar_cadastro(frame, dados):
         
         await frame.click(CONFIG["selectors"]["lupa_button"])
         
-        if await aguardar_elemento(frame, CONFIG["selectors"]["empresa_input"]):
+        # Aguardar o elemento empresa_input com timeout estendido e retry
+        logger.debug("Aguardando elemento empresa_input aparecer...")
+        
+        # Primeira tentativa com a função melhorada
+        elemento_encontrado = await aguardar_elemento(frame, CONFIG["selectors"]["empresa_input"], timeout=15000)
+        
+        if not elemento_encontrado:
+            logger.warning("Elemento empresa_input não encontrado com método padrão, tentando polling...")
+            # Tentativa com polling manual
+            elemento_encontrado = await aguardar_elemento_com_polling(frame, CONFIG["selectors"]["empresa_input"], timeout=20000)
+        
+        if elemento_encontrado:
+            logger.debug("Elemento empresa_input encontrado, prosseguindo...")
             inputs = frame.locator(CONFIG["selectors"]["empresa_input"])
             
-            posicao_input = obter_empresa_input_position(dados)
-            logger.debug(f"Usando empresa_input_position: {posicao_input}")
+            # Aguardar um pouco para garantir que o elemento está totalmente carregado
+            await asyncio.sleep(1)
             
-            await inputs.nth(posicao_input).click()
+            # Verificar se os inputs estão disponíveis
+            try:
+                count = await inputs.count()
+                logger.debug(f"Encontrados {count} inputs de empresa")
+                
+                if count > 0:
+                    posicao_input = obter_empresa_input_position(dados)
+                    logger.debug(f"Usando empresa_input_position: {posicao_input}")
+                    
+                    # Garantir que a posição não excede o número de inputs disponíveis
+                    if posicao_input >= count:
+                        logger.warning(f"Posição {posicao_input} excede número de inputs ({count}), usando posição 0")
+                        posicao_input = 0
+                    
+                    # Aguardar o input específico ficar visível
+                    input_especifico = inputs.nth(posicao_input)
+                    await input_especifico.wait_for(state="visible", timeout=5000)
+                    
+                    await input_especifico.click()
+                    logger.debug(f"Clique realizado no input de empresa na posição {posicao_input}")
+                else:
+                    logger.error("Nenhum input de empresa encontrado")
+                    raise Exception("Nenhum input de empresa disponível")
+                    
+            except Exception as input_error:
+                logger.error(f"Erro ao processar inputs de empresa: {input_error}")
+                raise
+        else:
+            logger.error("Elemento empresa_input não foi encontrado após todas as tentativas")
+            raise Exception("Timeout crítico: elemento empresa_input não encontrado")
         
         await asyncio.sleep(1.0)
         
-        await frame.evaluate("checkAll()")
+        # Executar checkAll() com tratamento de erro
+        try:
+            await frame.evaluate("checkAll()")
+            logger.debug("Função checkAll() executada")
+        except Exception as check_error:
+            logger.warning(f"Erro ao executar checkAll(): {check_error}")
+            # Tentar método alternativo se checkAll() falhar
+            try:
+                await frame.evaluate("document.querySelectorAll('input[type=\"checkbox\"]').forEach(cb => cb.checked = true)")
+                logger.debug("Checkboxes marcados via método alternativo")
+            except Exception as alt_error:
+                logger.warning(f"Método alternativo para checkboxes também falhou: {alt_error}")
         
         await frame.click(CONFIG["selectors"]["submit_button"])
         

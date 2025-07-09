@@ -22,12 +22,93 @@ async def encontrar_frame(page, url_pattern, max_tentativas=10, timeout=0.5):
     raise RuntimeError(f"Frame com padrão '{url_pattern}' não encontrado após {max_tentativas} tentativas")
 
 async def aguardar_elemento(frame_ou_page, seletor, timeout=10000):
-    try:
-        await frame_ou_page.wait_for_selector(seletor, timeout=timeout)
-        return True
-    except Exception as e:
-        logger.error(f"Timeout aguardando elemento {seletor}: {e}")
-        return False
+    """
+    Aguarda um elemento aparecer com sistema de retry mais robusto
+    """
+    max_tentativas = 3
+    timeout_por_tentativa = timeout
+    
+    for tentativa in range(max_tentativas):
+        try:
+            logger.debug(f"Aguardando elemento '{seletor}' - tentativa {tentativa + 1}/{max_tentativas}")
+            
+            # Primeira tentativa: aguardar o elemento ficar visível
+            await frame_ou_page.wait_for_selector(seletor, timeout=timeout_por_tentativa, state='visible')
+            logger.debug(f"Elemento '{seletor}' encontrado e visível na tentativa {tentativa + 1}")
+            return True
+            
+        except Exception as e:
+            logger.warning(f"Tentativa {tentativa + 1} falhou para elemento '{seletor}': {e}")
+            
+            if tentativa < max_tentativas - 1:  # Se não é a última tentativa
+                # Aguardar um pouco antes da próxima tentativa
+                await asyncio.sleep(2)
+                
+                # Tentar verificar se o frame ainda está válido
+                try:
+                    await frame_ou_page.wait_for_load_state("domcontentloaded", timeout=5000)
+                    logger.debug(f"Frame/página recarregado, tentando novamente...")
+                except:
+                    logger.debug(f"Frame pode estar instável, mas continuando tentativa {tentativa + 2}")
+                
+                # Aumentar o timeout para as próximas tentativas
+                timeout_por_tentativa = min(timeout_por_tentativa * 1.5, 20000)
+                logger.debug(f"Aumentando timeout para {timeout_por_tentativa}ms na próxima tentativa")
+            else:
+                # Última tentativa: tentar métodos alternativos
+                logger.warning(f"Última tentativa para elemento '{seletor}', usando métodos alternativos...")
+                
+                try:
+                    # Tentar aguardar apenas a existência do elemento (não necessariamente visível)
+                    await frame_ou_page.wait_for_selector(seletor, timeout=5000, state='attached')
+                    logger.debug(f"Elemento '{seletor}' encontrado (attached) na última tentativa")
+                    return True
+                except:
+                    # Tentar verificar se o elemento existe no DOM
+                    try:
+                        elementos = frame_ou_page.locator(seletor)
+                        count = await elementos.count()
+                        if count > 0:
+                            logger.debug(f"Elemento '{seletor}' existe no DOM ({count} elementos encontrados)")
+                            return True
+                    except:
+                        pass
+    
+    logger.error(f"Timeout aguardando elemento {seletor} após {max_tentativas} tentativas")
+    return False
+
+async def aguardar_elemento_com_polling(frame_ou_page, seletor, timeout=30000, intervalo_polling=1000):
+    """
+    Versão alternativa com polling manual - use esta se a função principal falhar
+    """
+    tempo_inicial = asyncio.get_event_loop().time()
+    timeout_segundos = timeout / 1000
+    intervalo_segundos = intervalo_polling / 1000
+    
+    while (asyncio.get_event_loop().time() - tempo_inicial) < timeout_segundos:
+        try:
+            elementos = frame_ou_page.locator(seletor)
+            count = await elementos.count()
+            
+            if count > 0:
+                # Verificar se pelo menos um elemento está visível
+                for i in range(count):
+                    try:
+                        elemento = elementos.nth(i)
+                        if await elemento.is_visible():
+                            logger.debug(f"Elemento '{seletor}' encontrado via polling")
+                            return True
+                    except:
+                        continue
+            
+            await asyncio.sleep(intervalo_segundos)
+            
+        except Exception as e:
+            logger.debug(f"Erro no polling para '{seletor}': {e}")
+            await asyncio.sleep(intervalo_segundos)
+    
+    logger.error(f"Timeout no polling para elemento {seletor}")
+    return False
 
 async def verificar_sessao_ativa(page):
     try:
