@@ -4,17 +4,17 @@ Um sistema automatizado para gestão de usuários e acessos utilizando RPA (Robo
 
 ## 📋 Índice
 
-- [Sobre o Projeto](#sobre-o-projeto)
-- [Funcionalidades](#funcionalidades)
-- [Pré-requisitos](#pré-requisitos)
-- [Instalação](#instalação)
-- [Configuração](#configuração)
-- [Como Usar](#como-usar)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [Bibliotecas Utilizadas](#bibliotecas-utilizadas)
-- [Solução de Problemas](#solução-de-problemas)
-- [Compatibilidade](#compatibilidade)
-- [Autor](#autor)
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [Funcionalidades](#-funcionalidades)
+- [Pré-requisitos](#-pré-requisitos)
+- [Instalação](#-instalação)
+- [Configuração](#-configuração)
+- [Como Usar](#-como-usar)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Bibliotecas Utilizadas](#-bibliotecas-utilizadas)
+- [Solução de Problemas](#-solução-de-problemas)
+- [Compatibilidade](#-compatibilidade)
+- [Autor](#-autor)
 
 ## 🎯 Sobre o Projeto
 
@@ -134,13 +134,6 @@ Configure o arquivo `Arquivos/usuarios.xlsx` com as seguintes colunas:
 python main.py
 ```
 
-### Teste de Instalação
-Verifique se tudo está funcionando:
-
-```bash
-python teste_instalacao.py
-```
-
 ### Monitoramento
 Os logs são salvos automaticamente na pasta `Log/` com timestamp para fácil rastreamento.
 
@@ -234,7 +227,6 @@ playwright install chromium
 - [ ] Arquivo `.env` configurado
 - [ ] Planilha Excel preparada
 - [ ] Estrutura de pastas criada
-- [ ] Teste de instalação executado com sucesso
 
 ## 🌐 Compatibilidade
 
