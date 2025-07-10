@@ -4,14 +4,14 @@
 # ================================
 
 # Automação Web - Playwright
-playwright==1.41.0
+playwright
 
 # Manipulação de Dados
-pandas==2.1.4
-openpyxl==3.1.2
+pandas
+openpyxl
 
 # Gerenciamento de Ambiente
-python-dotenv==1.0.0
+python-dotenv
 
 # ================================
 # OBSERVAÇÕES
