@@ -15,9 +15,79 @@ async def configurar_grupo(page, dados):
         subgroup_id = obter_subgroup_id(dados)
         logger.debug(f"Usando subgroup_id: {subgroup_id}")
         
-        await target_frame.select_option(CONFIG["selectors"]["subgroup_select"], subgroup_id)
+        # Aguardar o select estar disponível
+        await target_frame.wait_for_selector(CONFIG["selectors"]["subgroup_select"], state="visible", timeout=10000)
         
-        logger.debug("Grupo configurado com sucesso")
+        # Aguardar um pouco para garantir que as opções foram carregadas
+        await asyncio.sleep(1.5)
+        
+        # Verificar se o select tem opções disponíveis
+        try:
+            opcoes_html = await target_frame.evaluate("""
+                (selector) => {
+                    const select = document.querySelector(selector);
+                    if (!select) return null;
+                    return Array.from(select.options).map(opt => ({
+                        value: opt.value,
+                        text: opt.text
+                    }));
+                }
+            """, CONFIG["selectors"]["subgroup_select"])
+            
+            if opcoes_html:
+                logger.debug(f"Opções disponíveis no select: {opcoes_html}")
+                
+                # Verificar se o subgroup_id existe nas opções
+                valores_disponiveis = [opt['value'] for opt in opcoes_html]
+                
+                if subgroup_id not in valores_disponiveis:
+                    logger.warning(f"Valor '{subgroup_id}' não encontrado nas opções disponíveis: {valores_disponiveis}")
+                    
+                    # Tentar limpar espaços do subgroup_id
+                    subgroup_id_limpo = subgroup_id.strip()
+                    if subgroup_id_limpo in valores_disponiveis:
+                        logger.info(f"Valor encontrado após limpeza: '{subgroup_id_limpo}'")
+                        subgroup_id = subgroup_id_limpo
+                    else:
+                        # Tentar encontrar valor similar (com ou sem espaços)
+                        for valor in valores_disponiveis:
+                            if valor.strip() == subgroup_id.strip():
+                                logger.info(f"Valor similar encontrado: '{valor}'")
+                                subgroup_id = valor
+                                break
+                        else:
+                            raise Exception(f"Valor '{subgroup_id}' não existe nas opções do select. Opções disponíveis: {valores_disponiveis}")
+            else:
+                logger.warning("Não foi possível verificar as opções do select")
+        
+        except Exception as check_error:
+            logger.warning(f"Erro ao verificar opções do select: {check_error}")
+        
+        # Tentar selecionar a opção
+        try:
+            logger.debug(f"Tentando selecionar opção: '{subgroup_id}'")
+            await target_frame.select_option(CONFIG["selectors"]["subgroup_select"], subgroup_id, timeout=10000)
+            logger.debug("Grupo configurado com sucesso")
+        except Exception as select_error:
+            logger.error(f"Erro ao selecionar opção: {select_error}")
+            
+            # Tentar método alternativo via JavaScript
+            logger.warning("Tentando método alternativo via JavaScript...")
+            try:
+                await target_frame.evaluate("""
+                    (selector, value) => {
+                        const select = document.querySelector(selector);
+                        if (select) {
+                            select.value = value;
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                """, CONFIG["selectors"]["subgroup_select"], subgroup_id)
+                logger.debug("Grupo configurado via JavaScript")
+            except Exception as js_error:
+                logger.error(f"Método alternativo também falhou: {js_error}")
+                raise
+        
         return target_frame
         
     except Exception as e:
